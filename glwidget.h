@@ -1,4 +1,5 @@
 #pragma once
+
 #include "planeta.h"
 #include "particula.h"
 #include "vetor.h"
@@ -24,6 +25,9 @@ public:
     // Painting
     void paintGL();
 
+    // Desenha o plano de fundo
+    void displayBackGround();
+
 private slots:
     void tick();
 
@@ -32,5 +36,5 @@ private:
     int max_fps;
 
     std::vector<Particula> particulas;
-    Planeta stern;
+    Planeta planetoide;
 };

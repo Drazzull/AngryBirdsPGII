@@ -1,25 +1,24 @@
 #include "particula.h"
-
 #include <cmath>
 #include <ctime>
 #include <iostream>
 
 
-Particula::Particula(int screen_width, int screen_height, int x, int y)
-: screen_width(screen_width), screen_height(screen_height)
+Particula::Particula(int screen_width, int screen_height, int x, int y, int raio)
+    : screen_width(screen_width), screen_height(screen_height)
 {
     this->cor[0] = this->random(32, 255);
     this->cor[1] = this->random(64, 255);
     this->cor[2] = this->random(128, 255);
 
-    this->raio = this->random(10,80);
+    this->raio = raio;
     this->massa = this->raio/10;
     this->pos = Vetor(x, y);
     this->velocidade = Vetor(0.f, 0.f);
     this->aceleracao = Vetor(0.f, 0.f);
 
-//    std::cout << std::hex << "Particle (0x" << this << ")" << std::dec
-//              << " pos " << this->pos.getX() << "," << this->pos.getY() << " raio:" << this->raio << std::endl;
+    //    std::cout << std::hex << "Particle (0x" << this << ")" << std::dec
+    //              << " pos " << this->pos.getX() << "," << this->pos.getY() << " raio:" << this->raio << std::endl;
 }
 
 Particula::Particula(const Particula& obj)
@@ -37,29 +36,14 @@ Particula::Particula(const Particula& obj)
     this->screen_width = obj.screen_width;
     this->screen_height = obj.screen_height;
 
-//    std::cout << std::hex << "Particle #2 (0x" << this << ")" << std::dec
-//              << " pos " << this->pos.getX() << "," << this->pos.getY() << " Raio:" << this->raio << std::endl;
+    //    std::cout << std::hex << "Particle #2 (0x" << this << ")" << std::dec
+    //              << " pos " << this->pos.getX() << "," << this->pos.getY() << " Raio:" << this->raio << std::endl;
 }
 
 Particula::~Particula()
 {
-//    std::cout << std::hex << "~Particle (0x" << this << ")" << std::dec
-//              << " pos " << this->pos.getX() << "," << this->pos.getY() << " Raio:" << this->raio << std::endl;
-}
-
-float Particula::getMassa()
-{
-    return this->massa;
-}
-
-Vetor Particula::getVelocidade()
-{
-    return this->velocidade;
-}
-
-Vetor Particula::getPosicao()
-{
-    return this->pos;
+    //    std::cout << std::hex << "~Particle (0x" << this << ")" << std::dec
+    //              << " pos " << this->pos.getX() << "," << this->pos.getY() << " Raio:" << this->raio << std::endl;
 }
 
 int Particula::random(int minimo, int maximo)
@@ -89,14 +73,15 @@ void Particula::atualizar()
 
 void Particula::checarLimites()
 {
-//    std::cout << std::hex << "checarLimites (0x" << this << ")" << std::dec
-//              << " pos " << this->pos.getX() << "," << this->pos.getY()
-//              << " Raio:" << this->raio
-//              << " WxH:" << _screen_width << "x" << _screen_height << std::endl;
+    //    std::cout << std::hex << "checarLimites (0x" << this << ")" << std::dec
+    //              << " pos " << this->pos.getX() << "," << this->pos.getY()
+    //              << " Raio:" << this->raio
+    //              << " WxH:" << _screen_width << "x" << _screen_height << std::endl;
 
-    if (this->pos.getX() > this->screen_width)
+
+    if ((this->pos.getX() + this->raio) > this->screen_width)
     {
-        this->pos = Vetor(this->screen_width, this->pos.getY());
+        this->pos = Vetor(this->screen_width - this->raio, this->pos.getY());
         this->velocidade = Vetor(this->velocidade.getX() * -1, this->velocidade.getY());
     }
     else if (this->pos.getX() < 0)
@@ -105,11 +90,29 @@ void Particula::checarLimites()
         this->velocidade = Vetor(this->velocidade.getX() * -1, this->velocidade.getY());
     }
 
-    if (this->pos.getY() > this->screen_height)
+    if ((this->pos.getY() + this->raio) > this->screen_height)
     {
         this->velocidade = Vetor(this->velocidade.getX(), this->velocidade.getY() * -1);
-        this->pos = Vetor(this->pos.getX(), this->screen_height);
+        this->pos = Vetor(this->pos.getX(), this->screen_height - this->raio);
     }
+}
+
+void Particula::checarColisaoPlaneta(Vetor planeta, int raioPlaneta)
+{
+    if ((int) sqrt(pow(planeta.getX() - this->pos.getX(), 2) +
+                   pow(planeta.getY() - this->pos.getY(), 2)) <= raioPlaneta + this->raio)
+    {
+        this->pos = this->ultimaPosValida;
+        this->velocidade = Vetor(this->velocidade.getX() * -0.75, this->velocidade.getY() * -0.75);
+        return;
+    }
+
+    this->ultimaPosValida = Vetor(this->pos.getX(), this->pos.getY());
+}
+
+bool Particula::estaEmMovimento()
+{
+    return this->emMovimento;
 }
 
 void Particula::display()
@@ -119,11 +122,34 @@ void Particula::display()
 
     glColor3ub(this->cor[0], this->cor[1], this->cor[2]);
     glBegin(GL_POLYGON);
+    {
         for (int angle = 0; angle < 360; angle++)
         {
             float x = this->raio * std::cos(angle * 3.1415 / 180);
             float y = this->raio * std::sin(angle * 3.1415 / 180);
             glVertex2f(x, y);
         }
+    }
     glEnd();
+}
+
+// Getters
+GLfloat Particula::getMassa()
+{
+    return this->massa;
+}
+
+Vetor Particula::getVelocidade()
+{
+    return this->velocidade;
+}
+
+int Particula::getRaio()
+{
+    return this->raio;
+}
+
+Vetor Particula::getPosicao()
+{
+    return this->pos;
 }

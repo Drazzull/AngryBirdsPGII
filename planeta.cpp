@@ -8,13 +8,26 @@ float constrain(float value, float min, float max)
 
 Planeta::Planeta(int screen_width, int screen_height)
 {
-    this->pos = Vetor(screen_width / 2, screen_height / 2);
+    this->pos = Vetor(screen_width / 1.25, screen_height / 2);
     this->massa = 20;
-    this->G = 1;
+    this->G = 2;
+    this->raio = 300;
+    this->raioAtmosfera = this->raio + (this->raio / 2);
+}
+
+bool Planeta::particulaAdentrouAtmosfera(Particula m)
+{
+    return ((int) sqrt(pow(this->pos.getX() - m.getPosicao().getX(), 2) +
+                   pow(this->pos.getY() - m.getPosicao().getY(), 2)) <= this->raioAtmosfera + m.getRaio());
 }
 
 Vetor Planeta::calcularAtracao(Particula m)
 {
+    if (!this->particulaAdentrouAtmosfera(m))
+    {
+        return Vetor(0, 0);
+    }
+
     // Cálculo da direção da força
     Vetor forca = Vetor::sub(this->pos, m.getPosicao());
 
@@ -29,7 +42,7 @@ Vetor Planeta::calcularAtracao(Particula m)
     forca.normalize();
 
     // Calcular a magnitude da força gravitacional
-    float strength = (this->G * this->massa * m.getMassa()) / (distance * distance);
+    float strength = (this->G * this->massa * m.getMassa()) / pow(distance, 2);
 
     // Pegar o vetor força --> magnitude * direction
     forca.mult(strength);
@@ -39,19 +52,49 @@ Vetor Planeta::calcularAtracao(Particula m)
 
 void Planeta::display()
 {
+    this->displayAtmosfera();
+
     glLoadIdentity();
     glTranslatef(this->pos.getX(), this->pos.getY(), 0.0f);
 
     glColor3ub(255, 128, 0);
     glBegin(GL_POLYGON);
-    float raio = 225;
 
     for (int angulo = 0; angulo < 360; angulo++)
     {
-        float x = raio * std::cos(angulo * 3.1415 / 180);
-        float y = raio * std::sin(angulo * 3.1415 / 180);
+        float x = this->raio * std::cos(angulo * 3.1415 / 180);
+        float y = this->raio * std::sin(angulo * 3.1415 / 180);
         glVertex2f(x, y);
     }
 
     glEnd();
+}
+
+void Planeta::displayAtmosfera()
+{
+    glLoadIdentity();
+    glTranslatef(this->pos.getX(), this->pos.getY(), 0.0f);
+
+    glColor4ub(0, 0, 255, 25);
+    glBegin(GL_POLYGON);
+
+    for (int angulo = 0; angulo < 360; angulo++)
+    {
+        float x = this->raioAtmosfera * std::cos(angulo * 3.1415 / 180);
+        float y = this->raioAtmosfera * std::sin(angulo * 3.1415 / 180);
+        glVertex2f(x, y);
+    }
+
+    glEnd();
+}
+
+// Getters
+Vetor Planeta::getPos()
+{
+    return this->pos;
+}
+
+int Planeta::getRaio()
+{
+    return this->raio;
 }

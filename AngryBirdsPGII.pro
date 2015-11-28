@@ -11,3 +11,6 @@ HEADERS += \
     planeta.h \
     particula.h \
     vetor.h
+
+RESOURCES += \
+    imagens.qrc

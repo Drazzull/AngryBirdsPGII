@@ -1,13 +1,12 @@
 #pragma once
+
 #include "vetor.h"
-
 #include <QGLWidget>
-
 
 class Particula
 {
 public:
-    Particula(int screen_width = 1366, int screen_height = 768, int x = 0, int y = 0);
+    Particula(int screen_width = 1920, int screen_height = 1080, int x = 0, int y = 0, int raio = 0);
     Particula(const Particula& obj);
     ~Particula();
 
@@ -32,15 +31,28 @@ public:
      */
     void display();
 
-    float getMassa();
+    /**
+     * @brief checarColisaoPlaneta - Verifica se a partícula colidiu com o planeta e corrige a rota
+     * @param planeta - Vetor com a posição do planeta a ser verificado
+     * @param raioPlaneta - Tamanho do planeta
+     */
+    void checarColisaoPlaneta(Vetor planeta, int raioPlaneta);
+
+    // Getters
+    GLfloat getMassa();
     Vetor getVelocidade();
     Vetor getPosicao();
+    bool estaEmMovimento();
+    int getRaio();
 
 private:
     int random(int minimo, int maximo);
 
-    int screen_width, screen_height;
+    int screen_width, screen_height, raio;
     GLbyte cor[3];
     Vetor aceleracao, velocidade, pos;
-    float massa, raio;
+    GLfloat massa;
+
+    bool emMovimento;
+    Vetor ultimaPosValida;
 };

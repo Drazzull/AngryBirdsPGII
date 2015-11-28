@@ -1,4 +1,5 @@
 #pragma once
+
 #include "vetor.h"
 #include "particula.h"
 #include <QGLWidget>
@@ -15,7 +16,7 @@ public:
      * @param screen_width
      * @param screen_height
      */
-    Planeta(int screen_width = 1366, int screen_height = 768);
+    Planeta(int screen_width = 1920, int screen_height = 1080);
 
     /**
      * @brief calcularAtracao - Faz o cálculo da atração do objeto passado por parâmetro
@@ -25,11 +26,28 @@ public:
     Vetor calcularAtracao(Particula m);
 
     /**
+     * @brief particulaAdentrouAtmosfera - Verifica se a partícula está sob efeito da gravidade
+     * @param m - Partícula a ser verificada
+     * @return True em caso dela estar sob efeito, false caso contrário
+     */
+    bool particulaAdentrouAtmosfera(Particula m);
+
+    /**
      * @brief display - Apresenta o planeta
      */
     void display();
 
+    /**
+     * @brief displayAtmosfera - Apresenta a atmosfera do planeta
+     */
+    void displayAtmosfera();
+
+    // Getters
+    Vetor getPos();
+    int getRaio();
+
 private:
     Vetor pos, dragOffset;
-    float massa, G;
+    int raio;
+    GLfloat massa, G, raioAtmosfera;
 };
