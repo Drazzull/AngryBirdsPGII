@@ -1,4 +1,5 @@
 QT+= opengl
+QT += multimedia
 
 SOURCES += \
     main.cpp \
@@ -13,4 +14,5 @@ HEADERS += \
     vetor.h
 
 RESOURCES += \
-    imagens.qrc
+    imagens.qrc \
+    sons.qrc

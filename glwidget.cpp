@@ -12,6 +12,10 @@ GLWidget::GLWidget(QWidget *parent)
 {
     resize(this->width, this->height);
     QTimer::singleShot(1000/max_fps, this, SLOT(tick()));
+    this->backgroundSound = new QMediaPlayer(this);
+    this->backgroundSound->setMedia(QUrl("qrc:/sons/Sons/MainTheme.mp3"));
+
+    qDebug() << "current media: " << this->backgroundSound->currentMedia().canonicalUrl().toString();
 }
 
 GLWidget::~GLWidget()
@@ -36,6 +40,12 @@ void GLWidget::startObjects()
 
     // Cria o planetóide
     this->planetoide = Planeta(this->width, this->height);
+
+    // Toca o som
+    if (this->backgroundSound->isAvailable())
+    {
+    this->backgroundSound->play();
+    }
 }
 
 void GLWidget::initializeGL()

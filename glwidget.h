@@ -5,7 +5,7 @@
 #include "vetor.h"
 #include <QGLWidget>
 #include <QMouseEvent>
-
+#include <QMediaPlayer>
 
 class GLWidget : public QGLWidget
 {
@@ -47,6 +47,7 @@ private:
     std::vector<Particula> particulas;
     Planeta planetoide;
     bool passaroEmMovimento;
+    QMediaPlayer *backgroundSound;
 
     // Desenha o plano de fundo
     void displayBackGround();
