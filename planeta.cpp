@@ -10,15 +10,15 @@ Planeta::Planeta(int screen_width, int screen_height)
 {
     this->pos = Vetor(screen_width / 1.25, screen_height / 2);
     this->massa = 20;
-    this->G = 2;
-    this->raio = 300;
+    this->G = 5;
+    this->raio = screen_width > screen_height ? screen_width / 8 : screen_height / 8;
     this->raioAtmosfera = this->raio + (this->raio / 2);
 }
 
 bool Planeta::particulaAdentrouAtmosfera(Particula m)
 {
-    return ((int) sqrt(pow(this->pos.getX() - m.getPosicao().getX(), 2) +
-                   pow(this->pos.getY() - m.getPosicao().getY(), 2)) <= this->raioAtmosfera + m.getRaio());
+    return (sqrt(pow(this->pos.getX() - m.getPosicao().getX(), 2) +
+                 pow(this->pos.getY() - m.getPosicao().getY(), 2)) <= this->raioAtmosfera + m.getRaio());
 }
 
 Vetor Planeta::calcularAtracao(Particula m)
@@ -94,7 +94,7 @@ Vetor Planeta::getPos()
     return this->pos;
 }
 
-int Planeta::getRaio()
+GLfloat Planeta::getRaio()
 {
     return this->raio;
 }

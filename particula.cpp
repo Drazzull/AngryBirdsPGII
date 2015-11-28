@@ -99,8 +99,8 @@ void Particula::checarLimites()
 
 void Particula::checarColisaoPlaneta(Vetor planeta, int raioPlaneta)
 {
-    if ((int) sqrt(pow(planeta.getX() - this->pos.getX(), 2) +
-                   pow(planeta.getY() - this->pos.getY(), 2)) <= raioPlaneta + this->raio)
+    if (sqrt(pow(planeta.getX() - this->pos.getX(), 2) +
+             pow(planeta.getY() - this->pos.getY(), 2)) <= raioPlaneta + this->raio)
     {
         this->pos = this->ultimaPosValida;
         this->velocidade = Vetor(this->velocidade.getX() * -0.75, this->velocidade.getY() * -0.75);
@@ -152,4 +152,10 @@ int Particula::getRaio()
 Vetor Particula::getPosicao()
 {
     return this->pos;
+}
+
+// Setters
+void Particula::setPosicao(Vetor posicaoNova)
+{
+    this->pos = posicaoNova;
 }

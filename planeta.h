@@ -26,13 +26,6 @@ public:
     Vetor calcularAtracao(Particula m);
 
     /**
-     * @brief particulaAdentrouAtmosfera - Verifica se a partícula está sob efeito da gravidade
-     * @param m - Partícula a ser verificada
-     * @return True em caso dela estar sob efeito, false caso contrário
-     */
-    bool particulaAdentrouAtmosfera(Particula m);
-
-    /**
      * @brief display - Apresenta o planeta
      */
     void display();
@@ -42,12 +35,18 @@ public:
      */
     void displayAtmosfera();
 
+    /**
+     * @brief particulaAdentrouAtmosfera - Verifica se a partícula está sob efeito da gravidade
+     * @param m - Partícula a ser verificada
+     * @return True em caso dela estar sob efeito, false caso contrário
+     */
+    bool particulaAdentrouAtmosfera(Particula m);
+
     // Getters
     Vetor getPos();
-    int getRaio();
+    GLfloat getRaio();
 
 private:
     Vetor pos, dragOffset;
-    int raio;
-    GLfloat massa, G, raioAtmosfera;
+    GLfloat massa, G, raioAtmosfera, raio;
 };

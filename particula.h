@@ -45,14 +45,16 @@ public:
     bool estaEmMovimento();
     int getRaio();
 
-private:
-    int random(int minimo, int maximo);
+    // Setters
+    void setPosicao(Vetor posicaoNova);
 
+private:
     int screen_width, screen_height, raio;
     GLbyte cor[3];
     Vetor aceleracao, velocidade, pos;
     GLfloat massa;
-
     bool emMovimento;
     Vetor ultimaPosValida;
+
+    int random(int minimo, int maximo);
 };

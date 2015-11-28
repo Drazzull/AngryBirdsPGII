@@ -26,8 +26,16 @@ void GLWidget::tick()
 
 void GLWidget::startObjects()
 {
+    // Limpa as propriedades de controle do passaro atual
+    this->indicePassaro = 0;
+    this->passaroEmMovimento = false;
+
+    // Cria os objetos
     this->particulas.clear();
     this->particulas.push_back(Particula(this->width, this->height, 100 + (1 * (this->width / 6)), 255, 40));
+
+    // Cria o planetóide
+    this->planetoide = Planeta(this->width, this->height);
 }
 
 void GLWidget::initializeGL()
@@ -122,4 +130,72 @@ void GLWidget::displayBackGround()
     glFlush();
     glDisable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    QGLWidget::keyPressEvent(event);
+
+    if (event->key() == (Qt::Key_R) && (event->modifiers().testFlag(Qt::ControlModifier)))
+    {
+        // Reinicia os objetos
+        this->startObjects();
+    }
+}
+
+void GLWidget::mousePressEvent(QMouseEvent* event)
+{
+    QGLWidget::mousePressEvent(event);
+
+    // Somente executa as particularidades do método se o usuário clicou com o botão esquerdo do mouse
+    if (event->button() !=  Qt::LeftButton)
+    {
+        return;
+    }
+
+    // Se o pássaro entrou em órbita, cancela a execução do método
+    if (this->planetoide.particulaAdentrouAtmosfera(
+                this->particulas[this->indicePassaro]))
+    {
+        return;
+    }
+
+    // Se o usuário não clicar no passaro não inicia a contagem
+    int particulaX = this->particulas[this->indicePassaro].getPosicao().getX();
+    int particulaY = this->particulas[this->indicePassaro].getPosicao().getY();
+    GLfloat mag = sqrt(pow(event->pos().x() - particulaX, 2) +
+                       pow(event->pos().y() - particulaY, 2));
+
+    if (mag > this->particulas[this->indicePassaro].getRaio())
+    {
+        return;
+    }
+
+    this->passaroEmMovimento = true;
+}
+void GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    QGLWidget::mouseReleaseEvent(event);
+
+    this->passaroEmMovimento = false;
+}
+
+void GLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    QGLWidget::mouseMoveEvent(event);
+
+    if (!this->passaroEmMovimento)
+    {
+        return;
+    }
+
+    // Se o pássaro entrou em órbita, cancela a execução do método
+    if (this->planetoide.particulaAdentrouAtmosfera(
+                this->particulas[this->indicePassaro]))
+    {
+        return;
+    }
+
+    this->particulas[this->indicePassaro].setPosicao(
+                Vetor(event->pos().x(), event->pos().y()));
 }

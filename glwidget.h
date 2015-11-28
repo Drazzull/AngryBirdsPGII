@@ -14,27 +14,46 @@ public:
     GLWidget(QWidget* parent = 0);
     ~GLWidget();
 
+    /**
+     * @brief startObjects - Inicia os objetos
+     */
     void startObjects();
 
-    // OpenGL initialization
+    /**
+     * @brief initializeGL - Inicialização do OpenGL
+     */
     void initializeGL();
 
-    // Viewport resizing
+    /**
+     * @brief resizeGL - Redimensionamento da tela
+     * @param width - Largura
+     * @param height - Altura
+     */
     void resizeGL( int width, int height);
 
-    // Painting
+    /**
+     * @brief paintGL - Pintura do OpenGL
+     */
     void paintGL();
-
-    // Desenha o plano de fundo
-    void displayBackGround();
 
 private slots:
     void tick();
 
 private:
+    // Propriedades da classe
     int width, height;
     int max_fps;
-
+    int indicePassaro;
     std::vector<Particula> particulas;
     Planeta planetoide;
+    bool passaroEmMovimento;
+
+    // Desenha o plano de fundo
+    void displayBackGround();
+
+    // Eventos
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 };
