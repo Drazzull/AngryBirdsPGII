@@ -119,30 +119,40 @@ public:
     }
 
     /**
+     * @brief magnitudeEntreVetores - Calcula a magnitude entre dois vetores
+     * @param vetorInicial - Vetor primário
+     * @param vetorFinal - Vetor secundário
+     * @return Magnitude da distância entre dois vetores
+     */
+    static GLfloat magnitudeEntreVetores(Vetor vetorInicial, Vetor vetorFinal)
+    {
+        float x = vetorInicial.x - vetorFinal.x;
+        float y = vetorInicial.y - vetorFinal.y;
+        return sqrt(pow(x, 2) + pow(y, 2));
+    }
+
+    /**
      * @brief anguloEntreVetores - Obtém o angulo entre dois vetores
      * @param vetorInicial - Vetor com a posição inicial do pássaro no momento do lançamento
      * @param vetorFinal - Vetor com a posição no momento em que o usuário soltou o mouse
      * @param hipotenusa - Hipotenusa
-     * @param direcaoLancamento - T -> lançamento para o topo, B -> lançamento para baixo
      * @return Angulo entre os vetores
      */
-    static float anguloEntreVetores(Vetor vetorInicial, Vetor vetorFinal, GLfloat *hipotenusa, char *direcaoLancamento)
+    static GLfloat anguloEntreVetores(Vetor vetorInicial, Vetor vetorFinal, GLfloat hipotenusa)
     {
-        float catetoAdjacente = vetorInicial.x - vetorFinal.x;
-        float catetoOposto = vetorInicial.y - vetorFinal.y;
-        *hipotenusa = sqrt(pow(catetoAdjacente, 2) + pow(catetoOposto, 2));
-
+        // Calcula o arcocoseno entre os dois vetores
         if(vetorFinal.y > vetorInicial.y)
         {
-            float valor = catetoAdjacente / *hipotenusa;
-            *direcaoLancamento = 'T';
+            float catetoAdjacente = vetorInicial.x - vetorFinal.x;
+            GLfloat valor = catetoAdjacente / hipotenusa;
             return (acos(valor) * 180 / PI);
         }
 
+        // Calcula o arcoseno entre os dois vetores
         if(vetorFinal.y < vetorInicial.y)
         {
-            float valor = catetoOposto / *hipotenusa;
-            *direcaoLancamento = 'B';
+            float catetoOposto = vetorInicial.y - vetorFinal.y;
+            GLfloat valor = catetoOposto / hipotenusa;
             return (asin(valor) * 180 / PI);
         }
 

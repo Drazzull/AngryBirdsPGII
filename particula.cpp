@@ -197,7 +197,7 @@ void Particula::checarColisaoCirculoRetangulo(Vetor objetoDestino, GLfloat largu
     if ((distanciaCentros.getX() <= (largura / 2)) ||
             (distanciaCentros.getY() <= (altura / 2)))
     {
-        this->velocidade = Vetor(this->velocidade.getX() * -0.75, this->velocidade.getY() * -0.75);
+        this->velocidade = Vetor(this->velocidade.getX() * -0.9, this->velocidade.getY() * -0.9);
         this->pos = this->ultimaPosValida;
         return;
     }
@@ -372,13 +372,6 @@ void Particula::setPosicao(Vetor posicaoNova)
 {
     GLfloat xNovo = posicaoNova.getX();
     GLfloat yNovo = posicaoNova.getY();
-
-    /*if(sqrt(pow(xNovo - this->posInicial.getX(), 2) +
-            pow(yNovo - this->posInicial.getY(), 2)) > 50 + this->raio)
-    {
-        xNovo = this->ultimaPosValida.getX();
-        yNovo = this->ultimaPosValida.getY();
-    }*/
 
     this->pos = Vetor(xNovo, yNovo);
 }

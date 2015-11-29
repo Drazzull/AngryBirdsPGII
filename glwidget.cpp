@@ -15,7 +15,7 @@ GLWidget::GLWidget(QWidget *parent)
     this->backgroundSound = new QMediaPlayer(this);
     this->backgroundSound->setMedia(QUrl("qrc:/Sons/MainTheme.mp3"));
     this->backgroundSound->setVolume(50);
-    k = 0.0115f;
+    this->velocidadeLancamento = 0.001f;
     this->magnitudeLancamento = 0.0f;
     this->direcaoLancamento = 'X';
 }
@@ -96,10 +96,19 @@ Vetor GLWidget::atirarPassaro()
         this->magnitudeLancamento = 100.0f;
     }
 
-    // Retorna o vetor com a força estilingue
-    return Vetor((cos(angulo * 3.1415 / 180) * this->magnitudeLancamento * k),
-                 (sin(angulo * 3.1415 / 180) * this->magnitudeLancamento * k *
-                  this->direcaoLancamento == 'T' ? -1 : 1 ));
+    switch(this->direcaoLancamento)
+    {
+    case 'S':
+         return Vetor(cos(this->angulo * PI / 180) * this->magnitudeLancamento * this->velocidadeLancamento,
+                      (sin(this->angulo * PI / 180) * (this->magnitudeLancamento * this->velocidadeLancamento)));
+
+    case 'C':
+        return Vetor(cos(this->angulo * PI / 180) * this->magnitudeLancamento * this->velocidadeLancamento,
+                     (sin(this->angulo * PI / 180) * (this->magnitudeLancamento * this->velocidadeLancamento)) * -1);
+
+    default:
+        return Vetor(0, 0);
+    }
 }
 
 void GLWidget::paintGL()
@@ -225,24 +234,34 @@ void GLWidget::mousePressEvent(QMouseEvent* event)
         return;
     }
 
-    qDebug() << "Pressionou: " << this->particulas[this->indicePassaro].getPosicaoInicial().getX() << "," <<
-                this->particulas[this->indicePassaro].getPosicaoInicial().getY();
     this->passaroEmMovimento = true;
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     QGLWidget::mouseReleaseEvent(event);
+    if (!this->passaroEmMovimento)
+    {
+        return;
+    }
 
+    // Define que o pássaro parou de se movimentar por função do jogador
     this->passaroEmMovimento = false;
 
-    qDebug() << "Soltou: " << event->x() << ", " << event->y();;
-    this->vetorFinal = Vetor(event->x(), event->y());
-    this->angulo = Vetor::anguloEntreVetores(this->particulas[this->indicePassaro].getPosicaoInicial(), this->vetorFinal,
-                                             &this->magnitudeLancamento, &this->direcaoLancamento);
-    qDebug() << "Angulo: " << this->angulo;
-    qDebug() << "Magnitude: " << this->magnitudeLancamento ;
-    qDebug() << "Direcao do Lançamento: " << this->direcaoLancamento;
+    // Define o uso do vetorFinal
+    Vetor vetorFinal = Vetor(event->x(), event->y());
+
+    // Calcula a magnitude entre os dois vetores
+    this->magnitudeLancamento = Vetor::magnitudeEntreVetores(
+                this->particulas[this->indicePassaro].getPosicaoInicial(), vetorFinal);
+
+    // Define a direção do lançamento
+    this->direcaoLancamento =
+            vetorFinal.getY() > this->particulas[this->indicePassaro].getPosicaoInicial().getY() ? 'C' : 'S';
+
+    // Calcula o ângulo
+    this->angulo = Vetor::anguloEntreVetores(this->particulas[this->indicePassaro].getPosicaoInicial(), vetorFinal,
+                                             this->magnitudeLancamento);
     this->atirado = true;
 }
 

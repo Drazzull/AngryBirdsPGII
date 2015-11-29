@@ -10,7 +10,7 @@ Planeta::Planeta(int screen_width, int screen_height)
 {
     this->pos = Vetor(screen_width / 1.25, screen_height / 2);
     this->massa = 20;
-    this->G = 5;
+    this->G = 15;
     this->raio = screen_width > screen_height ? screen_width / 8 : screen_height / 8;
     this->raioAtmosfera = this->raio + (this->raio / 1.25);
 }

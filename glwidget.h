@@ -7,6 +7,8 @@
 #include <QMouseEvent>
 #include <QMediaPlayer>
 
+#define PI 3.141592
+
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
@@ -51,10 +53,9 @@ private:
 
     // Propriedades para o lançamento do pássaro
     bool atirado;
-    Vetor vetorFinal;
     float angulo;
     char direcaoLancamento;
-    GLfloat k, magnitudeLancamento;
+    GLfloat velocidadeLancamento, magnitudeLancamento;
 
     /**
      * @brief displayBackGround - Desenha o plano de fundo
