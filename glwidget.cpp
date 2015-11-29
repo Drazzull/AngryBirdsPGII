@@ -13,7 +13,8 @@ GLWidget::GLWidget(QWidget *parent)
     resize(this->width, this->height);
     QTimer::singleShot(1000/max_fps, this, SLOT(tick()));
     this->backgroundSound = new QMediaPlayer(this);
-    this->backgroundSound->setMedia(QUrl("qrc:/sons/Sons/MainTheme.mp3"));
+    this->backgroundSound->setMedia(QUrl("qrc:/Sons/MainTheme.mp3"));
+    this->backgroundSound->setVolume(50);
 
     qDebug() << "current media: " << this->backgroundSound->currentMedia().canonicalUrl().toString();
 }
@@ -36,16 +37,20 @@ void GLWidget::startObjects()
 
     // Cria os objetos
     this->particulas.clear();
-    this->particulas.push_back(Particula(this->width, this->height, 100 + (1 * (this->width / 6)), 255, 40));
+    this->particulas.push_back(
+                Particula(this->width, this->height, 100 + (1 * (this->width / 6)), 255, 40, 0, 0, 'C', 'P'));
+
+    // Quadrados
+    this->particulas.push_back(
+                Particula(this->width, this->height, this->planetoide.getPos().getX(),
+                          this->planetoide.getPos().getY() - this->planetoide.getRaio() - 40, 0, 20, 40, 'R', 'W'));
 
     // Cria o planetóide
     this->planetoide = Planeta(this->width, this->height);
 
     // Toca o som
-    if (this->backgroundSound->isAvailable())
-    {
+    this->backgroundSound->stop();
     this->backgroundSound->play();
-    }
 }
 
 void GLWidget::initializeGL()
@@ -98,6 +103,17 @@ void GLWidget::paintGL()
         this->particulas[i].atualizar();
         this->particulas[i].display();
         this->particulas[i].checarColisaoPlaneta(this->planetoide.getPos(), this->planetoide.getRaio());
+
+        // Checa a colisão com as demais partículas
+        for(unsigned int j = 0; j < this->particulas.capacity(); j++)
+        {
+            if (j == i)
+            {
+                continue;
+            }
+
+            this->particulas[i].checarColisaoEntreParticulas(this->particulas[j]);
+        }
     }
     glFlush();
 }
@@ -183,6 +199,7 @@ void GLWidget::mousePressEvent(QMouseEvent* event)
 
     this->passaroEmMovimento = true;
 }
+
 void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     QGLWidget::mouseReleaseEvent(event);
