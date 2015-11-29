@@ -13,11 +13,6 @@ public:
     ~Particula();
 
     /**
-     * @brief checarLimites - Checa os limites da tela para verificar se houve colisão por parte da partícula
-     */
-    void checarLimites();
-
-    /**
      * @brief aplicarForca - Aplica um vetor que representa uma força à partícula atual
      * @param forca - Força que será aplicada
      */
@@ -52,6 +47,7 @@ public:
     Vetor getPosicao();
     bool estaEmMovimento();
     int getRaio();
+    Vetor getPosicaoInicial();
 
     // Setters
     void setPosicao(Vetor posicaoNova);

@@ -3,6 +3,8 @@
 #include <QGLWidget>
 #include <math.h>
 
+#define PI 3.141592
+
 class Vetor
 {
 public:
@@ -114,6 +116,37 @@ public:
     static Vetor sub(Vetor v1, Vetor v2)
     {
         return Vetor(v1.getX() - v2.getX(), v1.getY() - v2.getY());
+    }
+
+    /**
+     * @brief anguloEntreVetores - Obtém o angulo entre dois vetores
+     * @param vetorInicial - Vetor com a posição inicial do pássaro no momento do lançamento
+     * @param vetorFinal - Vetor com a posição no momento em que o usuário soltou o mouse
+     * @param hipotenusa - Hipotenusa
+     * @param direcaoLancamento - T -> lançamento para o topo, B -> lançamento para baixo
+     * @return Angulo entre os vetores
+     */
+    static float anguloEntreVetores(Vetor vetorInicial, Vetor vetorFinal, GLfloat *hipotenusa, char *direcaoLancamento)
+    {
+        float catetoAdjacente = vetorInicial.x - vetorFinal.x;
+        float catetoOposto = vetorInicial.y - vetorFinal.y;
+        *hipotenusa = sqrt(pow(catetoAdjacente, 2) + pow(catetoOposto, 2));
+
+        if(vetorFinal.y > vetorInicial.y)
+        {
+            float valor = catetoAdjacente / *hipotenusa;
+            *direcaoLancamento = 'T';
+            return (acos(valor) * 180 / PI);
+        }
+
+        if(vetorFinal.y < vetorInicial.y)
+        {
+            float valor = catetoOposto / *hipotenusa;
+            *direcaoLancamento = 'B';
+            return (asin(valor) * 180 / PI);
+        }
+
+        return 0.0f;
     }
 
 private:

@@ -43,13 +43,22 @@ private:
     // Propriedades da classe
     int width, height;
     int max_fps;
-    int indicePassaro;
+    unsigned int indicePassaro;
     std::vector<Particula> particulas;
     Planeta planetoide;
     bool passaroEmMovimento;
     QMediaPlayer *backgroundSound;
 
-    // Desenha o plano de fundo
+    // Propriedades para o lançamento do pássaro
+    bool atirado;
+    Vetor vetorFinal;
+    float angulo;
+    char direcaoLancamento;
+    GLfloat k, magnitudeLancamento;
+
+    /**
+     * @brief displayBackGround - Desenha o plano de fundo
+     */
     void displayBackGround();
 
     // Eventos
@@ -57,4 +66,10 @@ private:
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
+
+    /**
+     * @brief atirarPassaro - Atira o pássaro na diração em que o usuário atirou-o
+     * @return Vetor com a força do lançamento
+     */
+    Vetor atirarPassaro();
 };

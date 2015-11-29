@@ -84,32 +84,6 @@ void Particula::atualizar()
     this->aceleracao.mult(0);
 }
 
-/*void Particula::checarLimites()
-{
-    //    std::cout << std::hex << "checarLimites (0x" << this << ")" << std::dec
-    //              << " pos " << this->pos.getX() << "," << this->pos.getY()
-    //              << " Raio:" << this->raio
-    //              << " WxH:" << _screen_width << "x" << _screen_height << std::endl;
-
-
-    if ((this->pos.getX() + this->raio) > this->screen_width)
-    {
-        this->pos = Vetor(this->screen_width - this->raio, this->pos.getY());
-        this->velocidade = Vetor(this->velocidade.getX() * -1, this->velocidade.getY());
-    }
-    else if (this->pos.getX() < 0)
-    {
-        this->pos = Vetor(0, this->pos.getY());
-        this->velocidade = Vetor(this->velocidade.getX() * -1, this->velocidade.getY());
-    }
-
-    if ((this->pos.getY() + this->raio) > this->screen_height)
-    {
-        this->velocidade = Vetor(this->velocidade.getX(), this->velocidade.getY() * -1);
-        this->pos = Vetor(this->pos.getX(), this->screen_height - this->raio);
-    }
-}*/
-
 void Particula::checarColisaoEntreParticulas(Particula m)
 {
     if ((this->formaGeometrica == 'C') && (m.formaGeometrica == 'C'))
@@ -245,7 +219,33 @@ void Particula::checarColisaoCirculoRetangulo(Vetor objetoDestino, GLfloat largu
 
 void Particula::checarColisaoRetanguloRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura)
 {
+    if (((objetoDestino.getX() + largura) > this->pos.getX()) &&
+            ((objetoDestino.getY() - altura) < this->pos.getY()))
+    {
+        qDebug("Colidiu acima Antes");
+        return;
+    }
 
+    if ((objetoDestino.getX() < (this->pos.getX() + largura)) &&
+            ((objetoDestino.getY() - altura) < this->pos.getY()))
+    {
+        qDebug("Colidiu acima Depois");
+        return;
+    }
+
+    if (((objetoDestino.getX() + largura) > this->pos.getX()) &&
+            (objetoDestino.getY() < (this->pos.getY() - this->altura)))
+    {
+        qDebug("Colidiu abaixo Antes");
+        return;
+    }
+
+    if ((objetoDestino.getX() < (this->pos.getX() + largura)) &&
+            (objetoDestino.getY() < (this->pos.getY() - this->altura)))
+    {
+        qDebug("Colidiu abaixo Depois");
+        return;
+    }
 }
 
 void Particula::display()
@@ -360,6 +360,11 @@ int Particula::getRaio()
 Vetor Particula::getPosicao()
 {
     return this->pos;
+}
+
+Vetor Particula::getPosicaoInicial()
+{
+    return this->posInicial;
 }
 
 // Setters

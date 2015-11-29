@@ -15,8 +15,9 @@ GLWidget::GLWidget(QWidget *parent)
     this->backgroundSound = new QMediaPlayer(this);
     this->backgroundSound->setMedia(QUrl("qrc:/Sons/MainTheme.mp3"));
     this->backgroundSound->setVolume(50);
-
-    qDebug() << "current media: " << this->backgroundSound->currentMedia().canonicalUrl().toString();
+    k = 0.0115f;
+    this->magnitudeLancamento = 0.0f;
+    this->direcaoLancamento = 'X';
 }
 
 GLWidget::~GLWidget()
@@ -34,11 +35,15 @@ void GLWidget::startObjects()
     // Limpa as propriedades de controle do passaro atual
     this->indicePassaro = 0;
     this->passaroEmMovimento = false;
+    this->atirado = false;
 
     // Cria os objetos
     this->particulas.clear();
     this->particulas.push_back(
                 Particula(this->width, this->height, 100 + (1 * (this->width / 6)), 255, 40, 0, 0, 'C', 'P'));
+    /*this->particulas.push_back(
+                Particula(this->width, this->height, this->planetoide.getPos().getX() - 500,
+                          this->planetoide.getPos().getY() - this->planetoide.getRaio() - 40, 0, 20, 40, 'R', 'W'));*/
 
     // Quadrados
     this->particulas.push_back(
@@ -83,6 +88,20 @@ void GLWidget::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+Vetor GLWidget::atirarPassaro()
+{
+    // Se a magnitude do lançamento for maior que 100, altera ele para o tamanho máximo
+    if(this->magnitudeLancamento > 100.0f)
+    {
+        this->magnitudeLancamento = 100.0f;
+    }
+
+    // Retorna o vetor com a força estilingue
+    return Vetor((cos(angulo * 3.1415 / 180) * this->magnitudeLancamento * k),
+                 (sin(angulo * 3.1415 / 180) * this->magnitudeLancamento * k *
+                  this->direcaoLancamento == 'T' ? -1 : 1 ));
+}
+
 void GLWidget::paintGL()
 {
     // Inicializa a pintura
@@ -98,11 +117,19 @@ void GLWidget::paintGL()
 
     for(unsigned int i = 0; i < this->particulas.capacity(); i++)
     {
+        // Calcula a atração, aplica a força da mesma
         Vetor force = this->planetoide.calcularAtracao(this->particulas[i]);
         this->particulas[i].aplicarForca(force);
+
+        // Se a partícula atual for o índice do pássaro atira o mesmo
+        if ((i == this->indicePassaro) && this->atirado)
+        {
+            Vetor estilingue = this->atirarPassaro();
+            this->particulas[i].aplicarForca(estilingue);
+        }
+
         this->particulas[i].atualizar();
         this->particulas[i].display();
-        this->particulas[i].checarColisaoPlaneta(this->planetoide.getPos(), this->planetoide.getRaio());
 
         // Checa a colisão com as demais partículas
         for(unsigned int j = 0; j < this->particulas.capacity(); j++)
@@ -114,6 +141,9 @@ void GLWidget::paintGL()
 
             this->particulas[i].checarColisaoEntreParticulas(this->particulas[j]);
         }
+
+        // Por fim checa a colisão com o planeta
+        this->particulas[i].checarColisaoPlaneta(this->planetoide.getPos(), this->planetoide.getRaio());
     }
     glFlush();
 }
@@ -179,9 +209,8 @@ void GLWidget::mousePressEvent(QMouseEvent* event)
         return;
     }
 
-    // Se o pássaro entrou em órbita, cancela a execução do método
-    if (this->planetoide.particulaAdentrouAtmosfera(
-                this->particulas[this->indicePassaro]))
+    // Se o pássaro foi atirado, cancela a execução do método
+    if (this->atirado)
     {
         return;
     }
@@ -191,12 +220,13 @@ void GLWidget::mousePressEvent(QMouseEvent* event)
     int particulaY = this->particulas[this->indicePassaro].getPosicao().getY();
     GLfloat mag = sqrt(pow(event->pos().x() - particulaX, 2) +
                        pow(event->pos().y() - particulaY, 2));
-
     if (mag > this->particulas[this->indicePassaro].getRaio())
     {
         return;
     }
 
+    qDebug() << "Pressionou: " << this->particulas[this->indicePassaro].getPosicaoInicial().getX() << "," <<
+                this->particulas[this->indicePassaro].getPosicaoInicial().getY();
     this->passaroEmMovimento = true;
 }
 
@@ -205,6 +235,15 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
     QGLWidget::mouseReleaseEvent(event);
 
     this->passaroEmMovimento = false;
+
+    qDebug() << "Soltou: " << event->x() << ", " << event->y();;
+    this->vetorFinal = Vetor(event->x(), event->y());
+    this->angulo = Vetor::anguloEntreVetores(this->particulas[this->indicePassaro].getPosicaoInicial(), this->vetorFinal,
+                                             &this->magnitudeLancamento, &this->direcaoLancamento);
+    qDebug() << "Angulo: " << this->angulo;
+    qDebug() << "Magnitude: " << this->magnitudeLancamento ;
+    qDebug() << "Direcao do Lançamento: " << this->direcaoLancamento;
+    this->atirado = true;
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
