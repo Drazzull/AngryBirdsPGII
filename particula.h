@@ -2,6 +2,7 @@
 
 #include "vetor.h"
 #include <QGLWidget>
+#include <QDebug>
 
 class Particula
 {
@@ -32,14 +33,16 @@ public:
      * @brief checarColisaoPlaneta - Verifica se a partícula colidiu com o planeta e corrige a rota
      * @param planeta - Vetor com a posição do planeta a ser verificado
      * @param raioPlaneta - Tamanho do planeta
+     * @return True em caso de colisão
      */
-    void checarColisaoPlaneta(Vetor planeta, GLfloat raioPlaneta);
+    bool checarColisaoPlaneta(Vetor planeta, GLfloat raioPlaneta);
 
     /**
-     * @brief checarColisaoEntreParticulas - Checa a colisão entre as partículas
+     * @brief checarColisaoEntreParticulas - Checa a colisão entre as partículas e recalcula as velocidades
      * @param m - Partícula que a atual deverá verificar se colidiu
+     * @return True em caso de colisão
      */
-    void checarColisaoEntreParticulas(Particula m);
+    bool checarColisaoEntreParticulas(Particula m);
 
     // Getters
     GLfloat getMassa();
@@ -51,6 +54,7 @@ public:
 
     // Setters
     void setPosicao(Vetor posicaoNova);
+    void setUltimaPosValida(Vetor posicao);
 
 private:
     int screen_width, screen_height;
@@ -75,34 +79,45 @@ private:
     void pintarObjeto();
 
     /**
+     * @brief detectarColisaoEntreParticulas - Apenas detecta a colisao entre as partículas
+     * @param m - partícula a ser verificada
+     * @return True em caso de colisão
+     */
+    bool detectarColisaoEntreParticulas(Particula m);
+
+    /**
      * @brief checarColisaoCirculoCirculo - Faz a detecção de colisão de uma partícula circular com um circulo
      * @param objetoDestino - Vetor com as propriedades do circulo de destino
      * @param raioDestino - Raio do destino
+     * @return True em caso de colisão
      */
-    void checarColisaoCirculoCirculo(Vetor objetoDestino, GLfloat raioDestino);
+    bool checarColisaoCirculoCirculo(Vetor objetoDestino, GLfloat raioDestino);
 
     /**
      * @brief checarColisaoRetanguloCirculo - Faz a detecção de colisão de uma partícula retangular com um circulo
      * @param objetoDestino - Vetor com as propriedades do circulo de destino
      * @param raioDestino - Raio do destino
+     * @return True em caso de colisão
      */
-    void checarColisaoRetanguloCirculo(Vetor objetoDestino, GLfloat raioDestino);
+    bool checarColisaoRetanguloCirculo(Vetor objetoDestino, GLfloat raioDestino);
 
     /**
      * @brief checarColisaoRetanguloCirculo - Faz a detecção de colisão de uma partícula circular com um retângulo
      * @param objetoDestino - Vetor com as propriedades do circulo de destino
      * @param largura - Largura do objeto
      * @param altura - Altura do objeto
+     * @return True em caso de colisão
      */
-    void checarColisaoCirculoRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura);
+    bool checarColisaoCirculoRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura);
 
     /**
      * @brief checarColisaoRetanguloCirculo - Faz a detecção de colisão de uma partícula retangular com um retângulo
      * @param objetoDestino - Vetor com as propriedades do circulo de destino
      * @param largura - Largura do objeto
      * @param altura - Altura do objeto
+     * @return True em caso de colisão
      */
-    void checarColisaoRetanguloRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura);
+    bool checarColisaoRetanguloRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura);
 
     /**
      * @brief displayCirculo - Desenha a partícula com propriedades de circulo

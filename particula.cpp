@@ -84,59 +84,123 @@ void Particula::atualizar()
     this->aceleracao.mult(0);
 }
 
-void Particula::checarColisaoEntreParticulas(Particula m)
+bool Particula::checarColisaoEntreParticulas(Particula m)
 {
-    if ((this->formaGeometrica == 'C') && (m.formaGeometrica == 'C'))
+    if (!this->detectarColisaoEntreParticulas(m))
     {
-        this->checarColisaoCirculoCirculo(m.pos, m.raio);
-        return;
+        return false;
     }
 
-    if ((this->formaGeometrica == 'R') && (m.formaGeometrica == 'C'))
-    {
-        this->checarColisaoRetanguloCirculo(m.pos, m.raio);
-        return;
-    }
+    this->pos = this->ultimaPosValida;
+    m.pos = m.ultimaPosValida;
 
-    if ((this->formaGeometrica == 'C') && (m.formaGeometrica == 'R'))
-    {
-        this->checarColisaoCirculoRetangulo(m.pos, m.largura, m.altura);
-    }
+    // Armazena as velocidades originais
+    Vetor v1Original = this->velocidade;
+    Vetor v2Original = m.velocidade;
 
-    if ((this->formaGeometrica == 'R') && (m.formaGeometrica == 'R'))
-    {
-        this->checarColisaoRetanguloRetangulo(m.pos, m.largura, m.altura);
-    }
+    // Cria as novas velocidades para o cálculo da partícula atual
+    Vetor velocidadeNova = this->velocidade;
+    Vetor velocidadeNovaM = m.velocidade;
+
+    // Calcula a nova velocidade da particula atual
+    // vf1 = (vi1(m1 - m2) + vi2(2 * m2)) / (m1 + m2)
+    velocidadeNova.mult(this->massa - m.massa);
+    velocidadeNovaM.mult(2 * m.massa);
+    velocidadeNova.add(velocidadeNovaM);
+    velocidadeNova.div(this->massa + m.massa);
+    this->velocidade = velocidadeNova;
+    qDebug() << "VF1: " << velocidadeNova.getX() << ", " << velocidadeNova.getY();
+
+    // Reinicia as velocidades para o cálculo da velocidade da outra partícula
+    velocidadeNova = v1Original;
+    velocidadeNovaM = v2Original;
+
+    // Faz o cálculo da nova velocidade da segunda partícula
+    // vf2 = (vi2(m2 - m1) + vi1(2 * m1)) / (m1 + m2)
+    velocidadeNovaM.mult(m.massa - this->massa);
+    velocidadeNova.mult(2 * this->massa);
+    velocidadeNovaM.add(velocidadeNova);
+    velocidadeNovaM.div(this->massa + m.massa);
+    m.velocidade = velocidadeNovaM;
+    qDebug() << "VF2: " << velocidadeNovaM.getX() << ", " << velocidadeNovaM.getY();
+
+    // Define que foi colidido
+    return true;
 }
 
-void Particula::checarColisaoPlaneta(Vetor planeta, GLfloat raioPlaneta)
+bool Particula::detectarColisaoEntreParticulas(Particula m)
+{
+    if (((this->formaGeometrica == 'C') && (m.formaGeometrica == 'C')) &&
+            (this->checarColisaoCirculoCirculo(m.pos, m.raio)))
+    {
+        //this->pos = this->ultimaPosValida;
+        //this->velocidade = Vetor(this->velocidade.getX() * -0.75, this->velocidade.getY() * -0.75);
+        return true;
+    }
+
+    if (((this->formaGeometrica == 'R') && (m.formaGeometrica == 'C')) &&
+            (this->checarColisaoRetanguloCirculo(m.pos, m.raio)))
+    {
+        /*this->pos = this->ultimaPosValida;
+        this->velocidade = Vetor(0, 0);*/
+        return true;
+    }
+
+    if (((this->formaGeometrica == 'C') && (m.formaGeometrica == 'R')) &&
+            (this->checarColisaoCirculoRetangulo(m.pos, m.largura, m.altura)))
+    {
+        /*this->pos = this->ultimaPosValida;
+        this->velocidade = Vetor(0, 0);*/
+        return true;
+    }
+
+    if (((this->formaGeometrica == 'R') && (m.formaGeometrica == 'R')) &&
+            (this->checarColisaoRetanguloRetangulo(m.pos, m.largura, m.altura)))
+    {
+        /*this->pos = this->ultimaPosValida;
+        this->velocidade = Vetor(0, 0);*/
+        return true;
+    }
+
+    return false;
+}
+
+bool Particula::checarColisaoPlaneta(Vetor planeta, GLfloat raioPlaneta)
 {
     switch(this->formaGeometrica)
     {
     case 'C':
-        this->checarColisaoCirculoCirculo(planeta, raioPlaneta);
-        break;
+        if(this->checarColisaoCirculoCirculo(planeta, raioPlaneta))
+        {
+            this->pos = this->ultimaPosValida;
+            this->velocidade = Vetor(this->velocidade.getX() * -0.5, this->velocidade.getY() * -0.5);
+            return true;
+        }
+
+        return false;
 
     case 'R':
-        this->checarColisaoRetanguloCirculo(planeta, raioPlaneta);
-        break;
+        if(this->checarColisaoRetanguloCirculo(planeta, raioPlaneta))
+        {
+            this->pos = this->ultimaPosValida;
+            this->velocidade = Vetor(this->velocidade.getX() * -0.5, this->velocidade.getY() * -0.5);
+            return true;
+        }
+
+        return false;
+
+    default:
+        return false;
     }
 }
 
-void Particula::checarColisaoCirculoCirculo(Vetor objetoDestino, GLfloat raioDestino)
+bool Particula::checarColisaoCirculoCirculo(Vetor objetoDestino, GLfloat raioDestino)
 {
-    if (sqrt(pow(objetoDestino.getX() - this->pos.getX(), 2) +
-             pow(objetoDestino.getY() - this->pos.getY(), 2)) <= raioDestino + this->raio)
-    {
-        this->pos = this->ultimaPosValida;
-        this->velocidade = Vetor(this->velocidade.getX() * -0.75, this->velocidade.getY() * -0.75);
-        return;
-    }
-
-    this->ultimaPosValida = Vetor(this->pos.getX(), this->pos.getY());
+    return (sqrt(pow(objetoDestino.getX() - this->pos.getX(), 2) +
+                 pow(objetoDestino.getY() - this->pos.getY(), 2)) <= raioDestino + this->raio);
 }
 
-void Particula::checarColisaoRetanguloCirculo(Vetor objetoDestino, GLfloat raioDestino)
+bool Particula::checarColisaoRetanguloCirculo(Vetor objetoDestino, GLfloat raioDestino)
 {
     // Centro do quadrado
     GLfloat centroX = this->pos.getX() + (this->largura / 2);
@@ -150,34 +214,30 @@ void Particula::checarColisaoRetanguloCirculo(Vetor objetoDestino, GLfloat raioD
     if ((distanciaCentros.getX() > ((this->largura / 2) + raioDestino)) ||
             (distanciaCentros.getY() > ((this->altura / 2) + raioDestino)))
     {
-        return;
+        return false;
     }
 
     // Verifica se eles estão colidindo nas laterais
     if ((distanciaCentros.getX() <= (this->largura / 2)) ||
             (distanciaCentros.getY() <= (this->altura / 2)))
     {
-        this->velocidade = Vetor(0, 0);
-        this->pos = this->ultimaPosValida;
-        return;
+        return true;
     }
 
     // Verifica se o circulo está colidindo com o centro dos vértices
     GLfloat distanciaVertices = pow(distanciaCentros.getX() - (this->largura / 2), 2) +
             pow(distanciaCentros.getY() - (this->altura / 2), 2);
-
     if (distanciaVertices <= pow(raioDestino, 2))
     {
-        this->velocidade = Vetor(0, 0);
-        this->pos = this->ultimaPosValida;
-        return;
+
+        return true;
     }
 
     // Define a última posição válida
-    this->ultimaPosValida = Vetor(this->pos.getX(), this->pos.getY());
+    return false;
 }
 
-void Particula::checarColisaoCirculoRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura)
+bool Particula::checarColisaoCirculoRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura)
 {
     // Centro do quadrado
     GLfloat centroX = objetoDestino.getX() + (largura / 2);
@@ -190,62 +250,33 @@ void Particula::checarColisaoCirculoRetangulo(Vetor objetoDestino, GLfloat largu
     if ((distanciaCentros.getX() > ((largura / 2) + this->raio)) ||
             (distanciaCentros.getY() > ((altura / 2) + this->raio)))
     {
-        return;
+        return false;
     }
 
     // Verifica se eles estão colidindo nas laterais
     if ((distanciaCentros.getX() <= (largura / 2)) ||
             (distanciaCentros.getY() <= (altura / 2)))
     {
-        this->velocidade = Vetor(this->velocidade.getX() * -0.9, this->velocidade.getY() * -0.9);
-        this->pos = this->ultimaPosValida;
-        return;
+        return true;
     }
 
     // Verifica se o circulo está colidindo com o centro dos vértices
     GLfloat distanciaVertices = pow(distanciaCentros.getX() - (largura / 2), 2) +
             pow(distanciaCentros.getY() - (altura / 2), 2);
-
     if (distanciaVertices <= pow(this->raio, 2))
     {
-        this->velocidade = Vetor(this->velocidade.getX() * -0.75, this->velocidade.getY() * -0.75);
-        this->pos = this->ultimaPosValida;
-        return;
+        return true;
     }
 
-    // Define a última posição válida
-    this->ultimaPosValida = Vetor(this->pos.getX(), this->pos.getY());
+    return false;
 }
 
-void Particula::checarColisaoRetanguloRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura)
+bool Particula::checarColisaoRetanguloRetangulo(Vetor objetoDestino, GLfloat largura, GLfloat altura)
 {
-    if (((objetoDestino.getX() + largura) > this->pos.getX()) &&
-            ((objetoDestino.getY() - altura) < this->pos.getY()))
-    {
-        qDebug("Colidiu acima Antes");
-        return;
-    }
-
-    if ((objetoDestino.getX() < (this->pos.getX() + largura)) &&
-            ((objetoDestino.getY() - altura) < this->pos.getY()))
-    {
-        qDebug("Colidiu acima Depois");
-        return;
-    }
-
-    if (((objetoDestino.getX() + largura) > this->pos.getX()) &&
-            (objetoDestino.getY() < (this->pos.getY() - this->altura)))
-    {
-        qDebug("Colidiu abaixo Antes");
-        return;
-    }
-
-    if ((objetoDestino.getX() < (this->pos.getX() + largura)) &&
-            (objetoDestino.getY() < (this->pos.getY() - this->altura)))
-    {
-        qDebug("Colidiu abaixo Depois");
-        return;
-    }
+    return (((objetoDestino.getY() + altura) > this->pos.getY()) &&
+            (objetoDestino.getY() < (this->pos.getY() + this->altura)) &&
+            (objetoDestino.getX() < (this->pos.getX() + this->largura)) &&
+            ((objetoDestino.getX() + largura) > this->pos.getX()));
 }
 
 void Particula::display()
@@ -374,4 +405,9 @@ void Particula::setPosicao(Vetor posicaoNova)
     GLfloat yNovo = posicaoNova.getY();
 
     this->pos = Vetor(xNovo, yNovo);
+}
+
+void Particula::setUltimaPosValida(Vetor posicao)
+{
+    this->ultimaPosValida = posicao;
 }

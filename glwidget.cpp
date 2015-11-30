@@ -40,15 +40,18 @@ void GLWidget::startObjects()
     // Cria os objetos
     this->particulas.clear();
     this->particulas.push_back(
-                Particula(this->width, this->height, 100 + (1 * (this->width / 6)), 255, 40, 0, 0, 'C', 'P'));
-    /*this->particulas.push_back(
-                Particula(this->width, this->height, this->planetoide.getPos().getX() - 500,
-                          this->planetoide.getPos().getY() - this->planetoide.getRaio() - 40, 0, 20, 40, 'R', 'W'));*/
+                Particula(this->width, this->height, 100 + (1 * (this->width / 6)), this->height / 2, 40, 0, 0,
+                          'C', 'P'));
 
     // Quadrados
     this->particulas.push_back(
                 Particula(this->width, this->height, this->planetoide.getPos().getX(),
                           this->planetoide.getPos().getY() - this->planetoide.getRaio() - 40, 0, 20, 40, 'R', 'W'));
+
+    this->particulas.push_back(
+                Particula(this->width, this->height, this->planetoide.getPos().getX(),
+                          this->planetoide.getPos().getY() - this->planetoide.getRaio() - 81, 0, 20, 40, 'R', 'W'));
+
 
     // Cria o planetóide
     this->planetoide = Planeta(this->width, this->height);
@@ -99,8 +102,8 @@ Vetor GLWidget::atirarPassaro()
     switch(this->direcaoLancamento)
     {
     case 'S':
-         return Vetor(cos(this->angulo * PI / 180) * this->magnitudeLancamento * this->velocidadeLancamento,
-                      (sin(this->angulo * PI / 180) * (this->magnitudeLancamento * this->velocidadeLancamento)));
+        return Vetor(cos(this->angulo * PI / 180) * this->magnitudeLancamento * this->velocidadeLancamento,
+                     (sin(this->angulo * PI / 180) * (this->magnitudeLancamento * this->velocidadeLancamento)));
 
     case 'C':
         return Vetor(cos(this->angulo * PI / 180) * this->magnitudeLancamento * this->velocidadeLancamento,
@@ -140,6 +143,8 @@ void GLWidget::paintGL()
         this->particulas[i].atualizar();
         this->particulas[i].display();
 
+        bool colidido = false;
+
         // Checa a colisão com as demais partículas
         for(unsigned int j = 0; j < this->particulas.capacity(); j++)
         {
@@ -148,11 +153,25 @@ void GLWidget::paintGL()
                 continue;
             }
 
-            this->particulas[i].checarColisaoEntreParticulas(this->particulas[j]);
+            if ((this->particulas[i].checarColisaoEntreParticulas(this->particulas[j])) &&
+                    !colidido)
+            {
+                colidido = true;
+            }
         }
 
         // Por fim checa a colisão com o planeta
-        this->particulas[i].checarColisaoPlaneta(this->planetoide.getPos(), this->planetoide.getRaio());
+        if ((this->particulas[i].checarColisaoPlaneta(this->planetoide.getPos(), this->planetoide.getRaio())) &&
+                !colidido)
+        {
+            colidido = true;
+        }
+
+        // Define a última posição válida
+        if (!colidido)
+        {
+            this->particulas[i].setUltimaPosValida(this->particulas[i].getPosicao());
+        }
     }
     glFlush();
 }
@@ -261,7 +280,10 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *event)
 
     // Calcula o ângulo
     this->angulo = Vetor::anguloEntreVetores(this->particulas[this->indicePassaro].getPosicaoInicial(), vetorFinal,
-                                             this->magnitudeLancamento);
+            this->magnitudeLancamento);
+
+    // A velocidade do lançamento vai ser 0.0005% da magniute
+    this->velocidadeLancamento = this->magnitudeLancamento * 0.00005;
     this->atirado = true;
 }
 
