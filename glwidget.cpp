@@ -8,7 +8,7 @@
 static GLuint texName;
 
 GLWidget::GLWidget(QWidget *parent)
-    : QGLWidget(parent), width(1920), height(1080), max_fps(100)
+    : QGLWidget(parent), width(1920), height(1080), max_fps(60)
 {
     resize(this->width, this->height);
     QTimer::singleShot(1000/max_fps, this, SLOT(tick()));
@@ -50,8 +50,7 @@ void GLWidget::startObjects()
 
     this->particulas.push_back(
                 Particula(this->width, this->height, this->planetoide.getPos().getX(),
-                          this->planetoide.getPos().getY() - this->planetoide.getRaio() - 81, 0, 20, 40, 'R', 'W'));
-
+                          this->planetoide.getPos().getY() - this->planetoide.getRaio() - 80, 0, 20, 40, 'R', 'W'));
 
     // Cria o planetóide
     this->planetoide = Planeta(this->width, this->height);
@@ -140,9 +139,6 @@ void GLWidget::paintGL()
             this->particulas[i].aplicarForca(estilingue);
         }
 
-        this->particulas[i].atualizar();
-        this->particulas[i].display();
-
         bool colidido = false;
 
         // Checa a colisão com as demais partículas
@@ -172,6 +168,9 @@ void GLWidget::paintGL()
         {
             this->particulas[i].setUltimaPosValida(this->particulas[i].getPosicao());
         }
+
+        this->particulas[i].atualizar();
+        this->particulas[i].display();
     }
     glFlush();
 }
